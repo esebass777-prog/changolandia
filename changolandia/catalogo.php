@@ -18,6 +18,23 @@ if ($elegida !== '' && array_key_exists($elegida, $todas)) {
     $stmt = $pdo->query('SELECT * FROM productos ORDER BY categoria, nombre');
 }
 $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// En la base solo se guarda el nombre base de la foto (por ejemplo "pijama2").
+// Aquí se busca el archivo real en img/catalogo/, con la extensión que exista.
+function foto_producto($base)
+{
+    $base = preg_replace('/[^A-Za-z0-9_-]/', '', (string) $base);
+    if ($base === '') {
+        return null;
+    }
+    foreach (['webp', 'jpg', 'jpeg', 'png'] as $extension) {
+        $ruta = "img/catalogo/$base.$extension";
+        if (is_file(__DIR__ . '/' . $ruta)) {
+            return $ruta;
+        }
+    }
+    return null;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -48,9 +65,14 @@ $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php foreach ($productos as $p):
                 $emoji   = $todas[$p['categoria']] ?? '🐵';
                 $agotado = (int) $p['stock'] <= 0;
+                $foto    = foto_producto($p['imagen'] ?? '');
             ?>
                 <article class="curso producto">
-                    <p class="emoji" aria-hidden="true"><?= $emoji ?></p>
+                    <?php if ($foto): ?>
+                        <img class="foto-producto" src="<?= e($foto) ?>" alt="<?= e($p['nombre']) ?>" loading="lazy">
+                    <?php else: ?>
+                        <p class="emoji" aria-hidden="true"><?= $emoji ?></p>
+                    <?php endif; ?>
                     <h2><?= e($p['nombre']) ?></h2>
                     <p><?= e($p['descripcion']) ?></p>
                     <p class="precio">$<?= number_format((float) $p['precio'], 2) ?></p>
