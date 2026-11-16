@@ -1,0 +1,236 @@
+/* =====================================================================
+   Tema Changolandia: se carga DESPUÉS de los estilos de cada página y
+   les da el mismo look (colores del logo, tipografía redondeada, botones
+   en píldora). Si cambias un color aquí, cambia en todo el sitio.
+   ===================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap');
+
+:root {
+    --guinda: #8a1538;
+    --guinda-oscuro: #6d1030;
+    --frambuesa: #c2185b;
+    --rosa: #ff5c8a;
+    --rosa-claro: #ffe4ec;
+    --rosa-suave: #fff5f8;
+    --banana: #f5c518;
+    --banana-claro: #fff3bf;
+    --texto: #3a1f2b;
+    --suave: #7a5a66;
+    --borde: #ffd3df;
+    --sombra: 0 10px 30px rgba(138, 21, 56, .13);
+    --display: Fredoka, "Trebuchet MS", system-ui, sans-serif;
+}
+
+/* ---------- Base ---------- */
+body {
+    font-family: Nunito, system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--texto);
+    background:
+        radial-gradient(circle at 12% 8%, #ffe0ea 0, transparent 38%),
+        radial-gradient(circle at 90% 92%, #fff0bd 0, transparent 38%),
+        var(--rosa-suave);
+    background-attachment: fixed;
+}
+h1, h2, h3 { font-family: var(--display); color: var(--guinda); letter-spacing: .01em; }
+a { color: var(--frambuesa); }
+a:hover { color: var(--guinda); }
+
+/* Adornos de fondo: se ven detrás del contenido y no estorban */
+body::before, body::after {
+    position: fixed;
+    z-index: -1;
+    font-size: clamp(3rem, 8vw, 6rem);
+    opacity: .16;
+    pointer-events: none;
+}
+body::before { content: "🍌"; left: 2vw; bottom: 3vh; transform: rotate(-18deg); }
+body::after  { content: "🐒"; right: 2vw; top: 12vh; transform: rotate(12deg); }
+
+/* ---------- Tarjetas y contenedores ---------- */
+.tarjeta, .container {
+    position: relative;
+    border: 1px solid var(--borde);
+    border-radius: 24px;
+    box-shadow: var(--sombra);
+}
+.tarjeta::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 7px;
+    border-radius: 24px 24px 0 0;
+    background: linear-gradient(90deg, var(--guinda), var(--rosa), var(--banana));
+}
+.logo { border: 4px solid var(--rosa-claro); box-shadow: 0 6px 16px rgba(138, 21, 56, .2); }
+
+/* ---------- Formularios ---------- */
+label { color: var(--guinda); font-weight: 700; }
+input, select, textarea {
+    border: 2px solid #f9c3d3;
+    border-radius: 12px;
+    background: #fffafb;
+    font-family: inherit;
+    color: var(--texto);
+}
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--rosa);
+    box-shadow: 0 0 0 4px rgba(255, 92, 138, .18);
+}
+
+/* ---------- Botones en píldora ---------- */
+button, .boton, .btn, .btn-primary {
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--guinda), var(--frambuesa));
+    color: #fff;
+    font-family: var(--display);
+    font-weight: 600;
+    letter-spacing: .02em;
+    box-shadow: 0 6px 14px rgba(138, 21, 56, .22);
+    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+button:hover, .boton:hover, .btn:hover, .btn-primary:hover {
+    background: linear-gradient(135deg, var(--guinda-oscuro), var(--guinda));
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(138, 21, 56, .28);
+}
+button:focus-visible, .boton:focus-visible, .btn:focus-visible, a:focus-visible {
+    outline: 3px solid var(--banana);
+    outline-offset: 2px;
+}
+button:disabled, button:disabled:hover {
+    background: #d6b9c4;
+    box-shadow: none;
+    transform: none;
+}
+.btn-secondary {
+    background: var(--rosa-claro);
+    color: var(--guinda);
+    box-shadow: none;
+}
+.btn-secondary:hover { background: #ffd0de; color: var(--guinda-oscuro); box-shadow: none; }
+.marcado, .marcado:hover { background: linear-gradient(135deg, #15803d, #22a455); }
+
+/* ---------- Avisos ---------- */
+.error { background: #ffe1e6; color: #9b1239; border-left: 5px solid #e11d48; }
+.exito { background: #e3f8e9; color: #166534; border-left: 5px solid #22a455; }
+.info  { background: var(--banana-claro); color: #6b4e00; border-left: 5px solid var(--banana); }
+.aviso-cookies { background: var(--guinda-oscuro); border-radius: 20px; }
+.aviso-cookies button { background: var(--banana); color: var(--guinda-oscuro); box-shadow: none; }
+.aviso-cookies .secundario { background: rgba(255, 255, 255, .18); color: #fff; }
+
+/* ---------- Menú de navegación interno ---------- */
+.menu { gap: 8px; border-bottom: 2px dashed var(--borde); }
+.menu a {
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: var(--rosa-suave);
+    color: var(--guinda);
+    font-weight: 700;
+    text-decoration: none;
+}
+.menu a:hover { background: var(--guinda); color: #fff; text-decoration: none; }
+
+/* ---------- Catálogo ---------- */
+.chips a { border: 2px solid var(--borde); font-weight: 700; transition: transform .15s ease; }
+.chips a:hover { transform: translateY(-2px); }
+.chips a.activa { background: linear-gradient(135deg, var(--guinda), var(--frambuesa)); }
+.curso {
+    border: 2px solid #ffe0ea;
+    border-radius: 20px;
+    background: #fff;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.curso:hover { transform: translateY(-5px); border-color: var(--rosa); box-shadow: 0 14px 28px rgba(138, 21, 56, .16); }
+.curso h2 { color: var(--guinda); font-size: 1.1rem; }
+.producto .precio {
+    display: inline-block;
+    padding: 3px 14px;
+    border-radius: 999px;
+    background: var(--banana-claro);
+    color: var(--guinda);
+    font-family: var(--display);
+    font-size: 1.25rem;
+}
+.foto-producto { border-radius: 14px; background: linear-gradient(160deg, #fff, var(--rosa-suave)); }
+.duracion { color: var(--suave); }
+
+/* ---------- Panel de métricas ---------- */
+.kpi {
+    border-radius: 16px;
+    border-left: 6px solid var(--banana);
+    background: linear-gradient(135deg, var(--rosa-claro), #fff);
+}
+.kpi strong { font-family: var(--display); color: var(--guinda); }
+th { background: var(--rosa-claro); color: var(--guinda); }
+.barra { background: linear-gradient(90deg, var(--rosa), var(--banana)); }
+
+/* ---------- Galería y listas ---------- */
+.galeria img { border: 3px solid #fff; box-shadow: 0 4px 12px rgba(138, 21, 56, .18); }
+
+/* ---------- Menú principal (menu.php) ---------- */
+body header {
+    background: linear-gradient(120deg, var(--guinda), var(--frambuesa) 60%, var(--rosa));
+    border-bottom: 5px solid var(--banana);
+    font-family: var(--display);
+}
+.salir {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .2);
+    font-family: Nunito, system-ui, sans-serif;
+    font-weight: 700;
+}
+.salir:hover { background: rgba(255, 255, 255, .35); }
+main .foto {
+    border: 6px solid #fff;
+    border-radius: 24px;
+    box-shadow: 0 10px 28px rgba(138, 21, 56, .25);
+}
+.opcion {
+    border-radius: 18px;
+    border: 2px solid transparent;
+    font-family: var(--display);
+    font-weight: 600;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.opcion:hover { opacity: 1; transform: translateY(-3px) scale(1.01); box-shadow: 0 12px 24px rgba(138, 21, 56, .2); }
+/* Se alternan por posición, así sigue verse parejo aunque al cliente le oculten opciones */
+main a.opcion:nth-of-type(odd)  { background: linear-gradient(135deg, var(--guinda), var(--frambuesa)); color: #fff; }
+main a.opcion:nth-of-type(even) { background: #fff; color: var(--guinda); border-color: var(--borde); }
+main a.opcion:nth-of-type(odd) i  { background: var(--banana); color: var(--guinda-oscuro); }
+main a.opcion:nth-of-type(even) i { background: var(--rosa); color: #fff; }
+
+/* ---------- Chat ---------- */
+.contenedor { border-color: var(--borde); box-shadow: var(--sombra); }
+.contenedor header { color: #fff; }
+.contenedor header h1 { color: #fff; }
+#estado { color: rgba(255, 255, 255, .85); }
+.volver { border-radius: 999px; background: rgba(255, 255, 255, .22); box-shadow: none; }
+.volver:hover { background: rgba(255, 255, 255, .38); color: #fff; }
+.mensaje { background: var(--rosa-claro); color: var(--texto); border-radius: 16px 16px 16px 4px; }
+.mensaje.propio { background: linear-gradient(135deg, var(--guinda), var(--frambuesa)); color: #fff; border-radius: 16px 16px 4px 16px; }
+#mensajes { background: var(--rosa-suave); }
+.campo-nombre label { color: var(--guinda); }
+
+/* ---------- Inventario y mapa (páginas con encabezado y .container) ---------- */
+.container h2 { border-bottom: 3px dashed var(--borde); }
+.btn-edit, .btn-delete { border-radius: 999px; font-weight: 700; }
+.btn-edit { background: var(--rosa-claro); border-color: #f9c3d3; color: var(--guinda); }
+.btn-edit:hover { background: #ffd0de; }
+.map-container { border: 4px solid #fff; border-radius: 18px; box-shadow: var(--sombra); }
+.container table th { background: var(--rosa-claro); color: var(--guinda); border-color: var(--borde); }
+.container td { border-color: var(--borde); }
+.container tr:nth-child(even) { background: var(--rosa-suave); }
+
+/* ---------- Encuesta ---------- */
+.perfil-img { border-color: var(--rosa); }
+.regalo-box { border-color: var(--rosa); background: linear-gradient(135deg, var(--rosa-suave), var(--banana-claro)); }
+.regalo-box h3 { color: var(--guinda); }
+
+/* ---------- Video ---------- */
+.video-marco { overflow: hidden; border: 5px solid #fff; border-radius: 20px; box-shadow: var(--sombra); background: #000; }
+.video-marco video { display: block; width: 100%; height: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; transform: none !important; }
+}
