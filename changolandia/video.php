@@ -12,7 +12,7 @@
 </head>
 <body>
   <main class="tarjeta ancha">
-    <h1>Conoce Changolandia</h1>
+    <h1>Conoce un poco mas sobre changos</h1>
     <div class="video-marco">
       <video controls preload="metadata">
         <source src="video/mi-video.mp4" type="video/mp4">
