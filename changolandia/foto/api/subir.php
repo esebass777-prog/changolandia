@@ -1,9 +1,12 @@
 <?php
-// Servicio que RECIBE una foto:  POST api/subir.php  (multipart/form-data, campo "foto")
+// Guarda una foto en la base de datos:  POST api/subir.php  (multipart: foto, rol = perfil | galeria)
+// Cada foto queda ligada a la cuenta de quien la sube.
 
 require __DIR__ . '/../../conexion.php';
+require __DIR__ . '/../../tienda.php';
 header('Content-Type: application/json; charset=utf-8');
-date_default_timezone_set('America/Mexico_City');
+
+const MAX_FOTOS_GALERIA = 30;
 
 function responder($codigo, $datos)
 {
@@ -15,20 +18,14 @@ function responder($codigo, $datos)
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     responder(405, ['error' => 'Usa POST.']);
 }
-
 if (!isset($_SESSION['usuario_id'])) {
     responder(401, ['error' => 'Inicia sesión.']);
-}
-
-if (!es_admin()) {
-    responder(403, ['error' => 'Solo el administrador puede subir fotos.']);
 }
 
 $foto = $_FILES['foto'] ?? null;
 if (!$foto || $foto['error'] !== UPLOAD_ERR_OK) {
     responder(400, ['error' => 'No llegó ninguna foto.']);
 }
-
 if ($foto['size'] > 5 * 1024 * 1024) {
     responder(400, ['error' => 'La foto pesa más de 5 MB.']);
 }
@@ -40,22 +37,46 @@ if (!isset($tipos[$tipo])) {
     responder(400, ['error' => 'Eso no es una imagen.']);
 }
 
-// El nombre lo pone el SERVIDOR: usuario + fecha + 4 caracteres al azar.
-$usuario = preg_replace('/[^A-Za-z0-9]/', '', $_SESSION['nombre']) ?: 'usuario';
-$archivo = $usuario . '_' . date('Ymd-His') . '_' . bin2hex(random_bytes(2)) . '.' . $tipos[$tipo];
+$rol       = ($_POST['rol'] ?? 'galeria') === 'perfil' ? 'perfil' : 'galeria';
+$usuarioId = (int) $_SESSION['usuario_id'];
+asegurar_tabla_fotos($pdo);
 
-$ruta = __DIR__ . '/../subidas/' . $archivo;
-if (!move_uploaded_file($foto['tmp_name'], $ruta)) {
-    responder(500, ['error' => 'No se pudo guardar la foto en el servidor.']);
+if ($rol === 'galeria') {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM fotos WHERE usuario_id = ? AND rol_foto = 'galeria' AND datos IS NOT NULL");
+    $stmt->execute([$usuarioId]);
+    if ((int) $stmt->fetchColumn() >= MAX_FOTOS_GALERIA) {
+        responder(400, ['error' => 'Tu galería ya tiene ' . MAX_FOTOS_GALERIA . ' fotos. Elimina alguna para agregar otra.']);
+    }
 }
 
-// El archivo ya está en el disco; ahora se REGISTRA en la tabla fotos.
-$sql = 'INSERT INTO fotos (usuario_id, nombre, archivo, tipo, bytes) VALUES (?, ?, ?, ?, ?)';
+$bytes   = file_get_contents($foto['tmp_name']);
+// La columna "archivo" es única y ya no es un archivo real: se rellena con un código al azar.
+$archivo = 'db_' . bin2hex(random_bytes(8)) . '.' . $tipos[$tipo];
+
 try {
-    $pdo->prepare($sql)->execute([$_SESSION['usuario_id'], $_SESSION['nombre'], $archivo, $tipo, $foto['size']]);
+    $pdo->beginTransaction();
+    if ($rol === 'perfil') {
+        // Solo existe UNA foto de perfil por usuario: la nueva reemplaza a la anterior.
+        $pdo->prepare("DELETE FROM fotos WHERE usuario_id = ? AND rol_foto = 'perfil'")->execute([$usuarioId]);
+    }
+    $stmt = $pdo->prepare(
+        'INSERT INTO fotos (usuario_id, nombre, archivo, tipo, bytes, datos, rol_foto) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    );
+    $stmt->bindValue(1, $usuarioId, PDO::PARAM_INT);
+    $stmt->bindValue(2, $_SESSION['nombre']);
+    $stmt->bindValue(3, $archivo);
+    $stmt->bindValue(4, $tipo);
+    $stmt->bindValue(5, strlen($bytes), PDO::PARAM_INT);
+    $stmt->bindValue(6, $bytes, PDO::PARAM_LOB);
+    $stmt->bindValue(7, $rol);
+    $stmt->execute();
+    $id = (int) $pdo->lastInsertId();
+    $pdo->commit();
 } catch (PDOException $error) {
-    unlink($ruta);
-    responder(500, ['error' => 'No se pudo registrar la foto en la base de datos.']);
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    responder(500, ['error' => 'No se pudo guardar la foto en la base de datos.']);
 }
 
-responder(201, ['archivo' => $archivo, 'url' => 'subidas/' . $archivo]);
+responder(201, ['id' => $id, 'rol' => $rol, 'url' => 'api/foto.php?id=' . $id]);
